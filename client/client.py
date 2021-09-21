@@ -21,6 +21,9 @@ def recvall(conn, length):
 
 
 def connectToServer():
+    """
+    Connects to the server
+    """
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     soc.connect((constants.HOST_IP, constants.HOST_PORT))
 
@@ -29,6 +32,9 @@ def connectToServer():
 
 
 def startWatching(soc):
+    """
+    Starts watching the screen
+    """
 
     # Some initial things
     # Recv the screen size of the sharing
@@ -48,6 +54,15 @@ def startWatching(soc):
 
 
 def recvFrame(soc):
+    """
+    Receives and returns frame from the socket
+
+    param 1: the socket connection
+    param 1 type: socket.socket
+
+    return type: mss.screenshot.ScreenShot
+    """
+
     # Retreive the size of the pixels length, the pixels length and pixels
     size_len = int.from_bytes(soc.recv(1), byteorder='big')
     size = int.from_bytes(soc.recv(size_len), byteorder='big')
@@ -58,6 +73,12 @@ def recvFrame(soc):
 
 
 def displayFrame(frame):
+    """
+    Displays the frame
+
+    param 1: frame from the server screen
+    """
+
     mat = np.array(frame)
     cv2.imshow("screenSharing", mat)
     cv2.waitKey(1)
