@@ -1,3 +1,4 @@
+import constants as sc
 from zlib import decompress
 import cv2
 import constants
@@ -5,8 +6,6 @@ import socket
 import constants
 from mss import screenshot
 import numpy as np
-import pygame
-
 
 def recvall(conn, length):
     """ Retreive all pixels. """
@@ -84,7 +83,10 @@ def displayFrame(frame):
     cv2.waitKey(1)
 
 
-def main():
+def main(ip = sc.HOST_IP, port = sc.HOST_PORT):
+    sc.HOST_IP = ip
+    sc.HOST_PORT = port
+
     connectToServer()
 
 

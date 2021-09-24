@@ -1,4 +1,4 @@
-from constants import HOST_IP, HOST_PORT, SCREEN_HEIGHT, SCREEN_WIDTH
+import constants as sc
 import socket
 import threading
 import mss
@@ -7,7 +7,7 @@ from zlib import compress
 
 def startServer():
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    soc.bind((HOST_IP, HOST_PORT))
+    soc.bind((sc.HOST_IP, sc.HOST_PORT))
     soc.listen()
 
     while True:
@@ -21,7 +21,7 @@ def shareScreen(soc):
     # Send some initiation things
 
     # Sends the Width and Height of the screen sharing
-    soc.send(f"{SCREEN_WIDTH} {SCREEN_HEIGHT}".encode())
+    soc.send(f"{sc.SCREEN_WIDTH} {sc.SCREEN_HEIGHT}".encode())
 
     # Starts sends frames
     while True:
@@ -75,7 +75,7 @@ def sendFrame(sock, frame):
 def getFrame():
     with mss.mss() as sct:
         monitor = {'top': 0, 'left': 0,
-                   'width': SCREEN_WIDTH, 'height': SCREEN_HEIGHT}
+                   'width': sc.SCREEN_WIDTH, 'height': sc.SCREEN_HEIGHT}
 
         return sct.grab(monitor)
 
