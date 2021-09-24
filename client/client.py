@@ -1,9 +1,7 @@
 import constants as sc
 from zlib import decompress
 import cv2
-import constants
 import socket
-import constants
 from mss import screenshot
 import numpy as np
 
@@ -24,7 +22,7 @@ def connectToServer():
     Connects to the server
     """
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    soc.connect((constants.HOST_IP, constants.HOST_PORT))
+    soc.connect((sc.HOST_IP, sc.HOST_PORT))
 
     # Starts watching
     startWatching(soc)
@@ -37,15 +35,15 @@ def startWatching(soc):
 
     # Some initial things
     # Recv the screen size of the sharing
-    constants.SCREEN_SHARING_WIDTH, constants.SCREEN_SHARING_HEIGHT = soc.recv(
+    sc.SCREEN_SHARING_WIDTH, sc.SCREEN_SHARING_HEIGHT = soc.recv(
         1024).decode().split(' ')
 
     # Convert the screen size from str to int
-    constants.SCREEN_SHARING_WIDTH = int(constants.SCREEN_SHARING_WIDTH)
-    constants.SCREEN_SHARING_HEIGHT = int(constants.SCREEN_SHARING_HEIGHT)
+    sc.SCREEN_SHARING_WIDTH = int(sc.SCREEN_SHARING_WIDTH)
+    sc.SCREEN_SHARING_HEIGHT = int(sc.SCREEN_SHARING_HEIGHT)
 
     print(
-        f"Starting watch on {constants.SCREEN_SHARING_WIDTH}:{constants.SCREEN_SHARING_HEIGHT}")
+        f"Starting watch on {sc.SCREEN_SHARING_WIDTH}:{sc.SCREEN_SHARING_HEIGHT}")
 
     while True:
         frame = recvFrame(soc)
@@ -68,7 +66,7 @@ def recvFrame(soc):
     framePixels = decompress(recvall(soc, size))
 
     return screenshot.ScreenShot(framePixels, {'top': 0, 'left': 0,
-                                               'width': constants.SCREEN_SHARING_WIDTH, 'height': constants.SCREEN_SHARING_HEIGHT})
+                                               'width': sc.SCREEN_SHARING_WIDTH, 'height': sc.SCREEN_SHARING_HEIGHT})
 
 
 def displayFrame(frame):
