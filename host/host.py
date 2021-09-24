@@ -80,7 +80,10 @@ def getFrame():
         return sct.grab(monitor)
 
 
-def main():
+def main(ip = sc.HOST_IP, port = sc.HOST_PORT):
+    sc.HOST_IP = ip
+    sc.HOST_PORT = port
+
     startServer()
 
 
