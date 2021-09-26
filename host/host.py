@@ -1,22 +1,32 @@
-from constants import *
+from .constants import *
 import socket
 import threading
 import mss
 from zlib import compress
 
+connectedClients = 0
 
 def startServer():
+    global connectedClients
+
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     soc.bind((HOST_IP, HOST_PORT))
     soc.listen()
 
     while True:
-        clientSocket, _ = soc.accept()
-        threading.Thread(target=shareScreen, args=(
-            clientSocket,)).start()
+        clientSocket, clientAddr = soc.accept()
+        if(connectedClients < MAX_CLIENTS):
+            connectedClients += 1
+            threading.Thread(target=shareScreen, args=(
+                clientSocket,)).start()
 
+        else:
+            clientSocket.close()
+            print(f"{clientAddr} tried to connect but we are already on the connected clients limit! connected clients:{connectedClients} limit:{MAX_CLIENTS}")
+    
 
 def shareScreen(soc):
+    global connectedClients
 
     # Send some initiation things
 
@@ -28,10 +38,14 @@ def shareScreen(soc):
         frame = getFrame()
         try:
             sendFrame(soc, frame)
-            print("a")
             
         except socket.error as e:
             print(f"{soc.getsockname()} Client has been disconnected!")
+            if CLOSE_AFTER_FIRST_CONNECTION and connectedClients >= 1:
+                print("Closing becusae CLOSE_AFTER_FIRST_CONNECTION is true!")
+                exit(0)
+                    
+            connectedClients -= 1
             break
 
 def sendFrame(sock, frame):
@@ -85,11 +99,13 @@ def getFrame():
         return sct.grab(monitor)
 
 
-def main(ip = HOST_IP, port =  HOST_PORT):
-    global HOST_IP, HOST_PORT
+def main(ip = HOST_IP, port =  HOST_PORT, maxClients = MAX_CLIENTS, closeAfterNConnection = CLOSE_AFTER_FIRST_CONNECTION):
+    global HOST_IP, HOST_PORT, MAX_CLIENTS, CLOSE_AFTER_FIRST_CONNECTION
     
     HOST_IP = ip
     HOST_PORT = port
+    MAX_CLIENTS = maxClients 
+    CLOSE_AFTER_FIRST_CONNECTION = closeAfterNConnection 
 
     startServer()
 
