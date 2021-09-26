@@ -1,4 +1,4 @@
-import constants as sc
+from constants import *
 from zlib import decompress
 import cv2
 import socket
@@ -22,32 +22,38 @@ def connectToServer():
     Connects to the server
     """
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    soc.connect((sc.HOST_IP, sc.HOST_PORT))
+    soc.connect((HOST_IP, HOST_PORT))
 
     # Starts watching
     startWatching(soc)
 
 
 def startWatching(soc):
+    global SCREEN_SHARING_WIDTH, SCREEN_SHARING_HEIGHT
+    
     """
     Starts watching the screen
     """
 
     # Some initial things
     # Recv the screen size of the sharing
-    sc.SCREEN_SHARING_WIDTH, sc.SCREEN_SHARING_HEIGHT = soc.recv(
+    SCREEN_SHARING_WIDTH, SCREEN_SHARING_HEIGHT = soc.recv(
         1024).decode().split(' ')
 
     # Convert the screen size from str to int
-    sc.SCREEN_SHARING_WIDTH = int(sc.SCREEN_SHARING_WIDTH)
-    sc.SCREEN_SHARING_HEIGHT = int(sc.SCREEN_SHARING_HEIGHT)
+    SCREEN_SHARING_WIDTH = int(SCREEN_SHARING_WIDTH)
+    SCREEN_SHARING_HEIGHT = int(SCREEN_SHARING_HEIGHT)
 
     print(
-        f"Starting watch on {sc.SCREEN_SHARING_WIDTH}:{sc.SCREEN_SHARING_HEIGHT}")
+        f"Starting watch on {SCREEN_SHARING_WIDTH}:{SCREEN_SHARING_HEIGHT}")
 
     while True:
         frame = recvFrame(soc)
         displayFrame(frame)
+
+        if cv2.getWindowProperty("screenSharing", cv2.WND_PROP_VISIBLE) <1:
+            print("Disconnecting...")
+            break
 
 
 def recvFrame(soc):
@@ -66,7 +72,7 @@ def recvFrame(soc):
     framePixels = decompress(recvall(soc, size))
 
     return screenshot.ScreenShot(framePixels, {'top': 0, 'left': 0,
-                                               'width': sc.SCREEN_SHARING_WIDTH, 'height': sc.SCREEN_SHARING_HEIGHT})
+                                               'width': SCREEN_SHARING_WIDTH, 'height': SCREEN_SHARING_HEIGHT})
 
 
 def displayFrame(frame):
@@ -81,9 +87,11 @@ def displayFrame(frame):
     cv2.waitKey(1)
 
 
-def main(ip = sc.HOST_IP, port = sc.HOST_PORT):
-    sc.HOST_IP = ip
-    sc.HOST_PORT = port
+def main(ip = HOST_IP, port = HOST_PORT):
+    global HOST_IP, HOST_PORT
+    
+    HOST_IP = ip
+    HOST_PORT = port
 
     connectToServer()
 

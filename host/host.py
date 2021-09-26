@@ -1,4 +1,4 @@
-import constants as sc
+from constants import *
 import socket
 import threading
 import mss
@@ -7,7 +7,7 @@ from zlib import compress
 
 def startServer():
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    soc.bind((sc.HOST_IP, sc.HOST_PORT))
+    soc.bind((HOST_IP, HOST_PORT))
     soc.listen()
 
     while True:
@@ -21,13 +21,18 @@ def shareScreen(soc):
     # Send some initiation things
 
     # Sends the Width and Height of the screen sharing
-    soc.send(f"{sc.SCREEN_WIDTH} {sc.SCREEN_HEIGHT}".encode())
+    soc.send(f"{SCREEN_WIDTH} { SCREEN_HEIGHT}".encode())
 
     # Starts sends frames
     while True:
         frame = getFrame()
-        sendFrame(soc, frame)
-
+        try:
+            sendFrame(soc, frame)
+            print("a")
+            
+        except ConnectionResetError as e:
+            print(f"{soc.getsockname()} Client has been disconnected!")
+            break
 
 def sendFrame(sock, frame):
     """
@@ -75,14 +80,16 @@ def sendFrame(sock, frame):
 def getFrame():
     with mss.mss() as sct:
         monitor = {'top': 0, 'left': 0,
-                   'width': sc.SCREEN_WIDTH, 'height': sc.SCREEN_HEIGHT}
+                   'width':  SCREEN_WIDTH, 'height': SCREEN_HEIGHT}
 
         return sct.grab(monitor)
 
 
-def main(ip = sc.HOST_IP, port = sc.HOST_PORT):
-    sc.HOST_IP = ip
-    sc.HOST_PORT = port
+def main(ip = HOST_IP, port =  HOST_PORT):
+    global HOST_IP, HOST_PORT
+    
+    HOST_IP = ip
+    HOST_PORT = port
 
     startServer()
 
