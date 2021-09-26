@@ -30,7 +30,7 @@ def shareScreen(soc):
             sendFrame(soc, frame)
             print("a")
             
-        except ConnectionResetError as e:
+        except socket.error as e:
             print(f"{soc.getsockname()} Client has been disconnected!")
             break
 
