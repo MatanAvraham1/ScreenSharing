@@ -1,4 +1,4 @@
-from .constants import *
+from constants import *
 import socket
 import threading
 import mss
@@ -9,21 +9,40 @@ connectedClients = 0
 def startServer():
     global connectedClients
 
+    print("Starting Server...")
+
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     soc.bind((HOST_IP, HOST_PORT))
     soc.listen()
 
+    print("Waiting for clients...")
+
+    # Accept clients
     while True:
         clientSocket, clientAddr = soc.accept()
-        if(connectedClients < MAX_CLIENTS):
+        print(f"{clientAddr} has been connected!")
+
+        if (ONLY_ONE_CONNECTION and connectedClients == 0) or connectedClients < MAX_CONNECTED_CLIENTS:  
             connectedClients += 1
-            threading.Thread(target=shareScreen, args=(
-                clientSocket,)).start()
+
+            t = threading.Thread(target=shareScreen, args=(
+                clientSocket,))
+            t.start()
+
+            if ONLY_ONE_CONNECTION and connectedClients == 1:
+                t.join() # Waits to the thread to ending
+                print("Closing becusae ONLY_ONE_CONNECTION is true!")
+                exit(0)   
 
         else:
             clientSocket.close()
-            print(f"{clientAddr} tried to connect but we are already on the connected clients limit! connected clients:{connectedClients} limit:{MAX_CLIENTS}")
-    
+
+            if ONLY_ONE_CONNECTION and connectedClients == 1:
+                print(f"{clientAddr} tried to connect but we becuase ONLY_ONE_CONNECTION is true we can accept only 1 client and there is already one connected!")
+
+            elif (connectedClients == MAX_CONNECTED_CLIENTS):
+                print(f"{clientAddr} tried to connect but we are already on the connected clients limit! connected clients:{connectedClients} limit:{MAX_CONNECTED_CLIENTS}")
+
 
 def shareScreen(soc):
     global connectedClients
@@ -39,12 +58,8 @@ def shareScreen(soc):
         try:
             sendFrame(soc, frame)
             
-        except socket.error as e:
-            print(f"{soc.getsockname()} Client has been disconnected!")
-            if CLOSE_AFTER_FIRST_CONNECTION and connectedClients >= 1:
-                print("Closing becusae CLOSE_AFTER_FIRST_CONNECTION is true!")
-                exit(0)
-                    
+        except socket.error as e: # If the client has been disconnected
+            print(f"{soc.getsockname()} Client has been disconnected!") 
             connectedClients -= 1
             break
 
@@ -99,13 +114,15 @@ def getFrame():
         return sct.grab(monitor)
 
 
-def main(ip = HOST_IP, port =  HOST_PORT, maxClients = MAX_CLIENTS, closeAfterNConnection = CLOSE_AFTER_FIRST_CONNECTION):
-    global HOST_IP, HOST_PORT, MAX_CLIENTS, CLOSE_AFTER_FIRST_CONNECTION
-    
+def main(ip = HOST_IP, port = HOST_PORT, max_connected_clients = MAX_CONNECTED_CLIENTS, only_one_connection = ONLY_ONE_CONNECTION):
+    global HOST_IP, HOST_PORT, MAX_CONNECTED_CLIENTS, ONLY_ONE_CONNECTION
     HOST_IP = ip
     HOST_PORT = port
-    MAX_CLIENTS = maxClients 
-    CLOSE_AFTER_FIRST_CONNECTION = closeAfterNConnection 
+    MAX_CONNECTED_CLIENTS = max_connected_clients 
+    ONLY_ONE_CONNECTION = only_one_connection
+
+    if ONLY_ONE_CONNECTION:
+        MAX_CONNECTED_CLIENTS = 1
 
     startServer()
 

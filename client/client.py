@@ -1,4 +1,4 @@
-from .constants import *
+from constants import *
 from zlib import decompress
 import cv2
 import socket
