@@ -22,13 +22,13 @@ def connectToServer():
     Connects to the server
     """
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    soc.connect((HOST_IP, HOST_PORT))
+    soc.connect((SHARER_IP, SHARER_PORT))
 
     # Starts watching
-    startWatching(soc)
+    watchScreen(soc)
 
 
-def startWatching(soc):
+def watchScreen(soc):
     global SCREEN_SHARING_WIDTH, SCREEN_SHARING_HEIGHT
     
     """
@@ -87,11 +87,11 @@ def displayFrame(frame):
     cv2.waitKey(1)
 
 
-def main(ip = HOST_IP, port = HOST_PORT):
-    global HOST_IP, HOST_PORT
+def main(ip = SHARER_IP, port = SHARER_PORT):
+    global SHARER_IP, SHARER_PORT
     
-    HOST_IP = ip
-    HOST_PORT = port
+    SHARER_IP = ip
+    SHARER_PORT = port
 
     connectToServer()
 
