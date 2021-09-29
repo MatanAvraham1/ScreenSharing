@@ -4,10 +4,16 @@ import cv2
 import socket
 
 
-def connectToServer():
+def connectToServer(ip = SHARER_IP, port = SHARER_PORT):
     """
     Connects to the server
     """
+
+    global SHARER_IP, SHARER_PORT
+    
+    SHARER_IP = ip
+    SHARER_PORT = port
+
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     soc.connect((SHARER_IP, SHARER_PORT))
 
