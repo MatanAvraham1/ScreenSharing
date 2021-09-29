@@ -1,4 +1,4 @@
-from watcher.module import displayFrame, recvFrame
+from watcher.helper import displayFrame, recvFrame
 from constants import *
 import cv2
 import socket

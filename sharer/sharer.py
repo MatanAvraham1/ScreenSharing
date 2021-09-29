@@ -1,4 +1,4 @@
-from sharer.module import getFrame, sendFrame
+from sharer.helper import getFrame, sendFrame
 from constants import *
 import socket
 import threading
@@ -54,7 +54,7 @@ def shareScreen(soc):
     # Sends the Width and Height of the screen sharing
     SCREEN_WIDTH = size().width
     SCREEN_HEIGHT = size().height
-    
+
     soc.send(f"{SCREEN_WIDTH} { SCREEN_HEIGHT}".encode())
 
     # Starts sends frames
