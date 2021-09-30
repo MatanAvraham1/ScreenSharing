@@ -1,5 +1,5 @@
-from watcher.helper import displayFrame, recvFrame
-from constants import *
+from .helper import displayFrame, recvFrame
+from .constants import *
 import cv2
 import socket
 
@@ -27,25 +27,30 @@ def watchScreen(soc):
     """
     Starts watching the screen
     """
-
+    
     # Some initial things
-    # Recv the screen size of the sharing
-    SCREEN_SHARING_WIDTH, SCREEN_SHARING_HEIGHT = soc.recv(
-        1024).decode().split(' ')
+
+
+    # Recv the len of the screen resolution string (we receiving the len of the screen resultion string only as 1 byte
+    # because the len will not be bigger than 1 byte presentation ability (0 - 128)
+    screenResolutionLen = int.from_bytes(soc.recv(1), 'big') 
+
+    # Recv the screen resolution of the shared screen
+    SCREEN_SHARING_WIDTH, SCREEN_SHARING_HEIGHT = soc.recv(screenResolutionLen).decode().split(' ')
 
     # Convert the screen size from str to int
     SCREEN_SHARING_WIDTH = int(SCREEN_SHARING_WIDTH)
     SCREEN_SHARING_HEIGHT = int(SCREEN_SHARING_HEIGHT)
 
     print(
-        f"Starting watch on {SCREEN_SHARING_WIDTH}:{SCREEN_SHARING_HEIGHT}")
+        f"Start watching on {SCREEN_SHARING_WIDTH}:{SCREEN_SHARING_HEIGHT}")
 
     while True:
         frame = recvFrame(soc, SCREEN_SHARING_WIDTH, SCREEN_SHARING_HEIGHT)
         displayFrame(frame, "screenSharing")
 
         if cv2.getWindowProperty("screenSharing", cv2.WND_PROP_VISIBLE) <1:
-            print("Disconnecting...")
+            print("Screen sharing window has been closed")
             break
 
 

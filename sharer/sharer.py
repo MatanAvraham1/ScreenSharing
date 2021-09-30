@@ -1,5 +1,5 @@
-from sharer.helper import getFrame, sendFrame
-from constants import *
+from .helper import getFrame, sendFrame
+from .constants import *
 import socket
 import threading
 
@@ -55,7 +55,12 @@ def shareScreen(soc):
     SCREEN_WIDTH = size().width
     SCREEN_HEIGHT = size().height
 
-    soc.send(f"{SCREEN_WIDTH} { SCREEN_HEIGHT}".encode())
+    screenResolution = f"{SCREEN_WIDTH} {SCREEN_HEIGHT}"
+    # Sends the len of [screenResolution] as one byte (This len tells the client 
+    # how much bytes recv from the socket to get [screenResolution] and not to blend with the other socket data)
+    # We send the len only as 1 byte because the len will not be bigger than 1 byte presentation ability (0 - 128)
+    soc.send(len(screenResolution).to_bytes(1, 'big')) 
+    soc.send(screenResolution.encode()) # Sends the screen resulution
 
     # Starts sends frames
     while True:
